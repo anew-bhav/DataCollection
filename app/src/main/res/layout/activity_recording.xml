@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Changes Made Include
+==>Changed the layout and made it responsive to different screens added FrameLayout for each button
+==>Hardcoded the strings in recording activity
+==>
+-->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="datacollection.dic.datacollection.RecordingActivity">
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1">
+
+        <TextView
+            android:id="@+id/timer_textview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="70dp"
+            android:gravity="center"
+            android:text="@string/timer_initial"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textSize="50sp" />
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="3"
+        android:padding="20dp"
+        android:layout_margin="10dp">
+
+        <FrameLayout
+            android:id="@+id/StartButtonFrame"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:layout_margin="10dp">
+
+            <Button
+                android:id="@+id/StartButton"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_gravity="center"
+                android:background="#a4c639"
+                android:padding="15dp"
+                android:text="@string/start_button"
+                android:textStyle="bold" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/StopButtonFrame"
+            android:layout_below="@+id/StartButtonFrame"
+            android:layout_centerHorizontal="true"
+            android:layout_margin="10dp">
+
+            <Button
+                android:id="@+id/StopButton"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_gravity="center"
+                android:background="#ffff00"
+                android:padding="15dp"
+                android:text="@string/stop_button"
+                android:textStyle="bold" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/ResetButtonFrame"
+            android:layout_below="@+id/StopButtonFrame"
+            android:layout_centerHorizontal="true"
+            android:layout_margin="10dp">
+
+            <Button
+                android:id="@+id/ResetButton"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_gravity="center"
+                android:background="#ff0000"
+                android:padding="15dp"
+                android:text="@string/reset"
+                android:textStyle="bold" />
+        </FrameLayout>
+    </RelativeLayout>
+
+
+</LinearLayout>
+
+
