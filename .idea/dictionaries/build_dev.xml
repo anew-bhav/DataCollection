@@ -2,6 +2,7 @@
   <dictionary name="build-dev">
     <words>
       <w>datacollection</w>
+      <w>samplerate</w>
       <w>textview</w>
       <w>twowheeler</w>
     </words>
