@@ -32,9 +32,9 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_margin="10dp"
         android:layout_weight="3"
-        android:padding="20dp"
-        android:layout_margin="10dp">
+        android:padding="20dp">
 
         <FrameLayout
             android:id="@+id/StartButtonFrame"
@@ -56,9 +56,9 @@
         </FrameLayout>
 
         <FrameLayout
+            android:id="@+id/StopButtonFrame"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/StopButtonFrame"
             android:layout_below="@+id/StartButtonFrame"
             android:layout_centerHorizontal="true"
             android:layout_margin="10dp">
@@ -74,24 +74,7 @@
                 android:textStyle="bold" />
         </FrameLayout>
 
-        <FrameLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/ResetButtonFrame"
-            android:layout_below="@+id/StopButtonFrame"
-            android:layout_centerHorizontal="true"
-            android:layout_margin="10dp">
 
-            <Button
-                android:id="@+id/ResetButton"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:layout_gravity="center"
-                android:background="#ff0000"
-                android:padding="15dp"
-                android:text="@string/reset"
-                android:textStyle="bold" />
-        </FrameLayout>
     </RelativeLayout>
 
 

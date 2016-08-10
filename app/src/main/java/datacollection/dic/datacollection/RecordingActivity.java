@@ -1,5 +1,6 @@
 package datacollection.dic.datacollection;
 
+import android.content.Context;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -10,29 +11,40 @@ import android.widget.TextView;
 import java.util.Locale;
 
 public class RecordingActivity extends AppCompatActivity {
-    private int seconds = 0;
-    private boolean running;
-
-    //UI Elements
-
+    Context mContext;
+    Recording mRecord;
     Button mStartButton;
     Button mStopButton;
-    Button mResetButton;
+
+    //UI Elements
+    private int seconds = 0;
+    private boolean running;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recording);
+        mContext = this;
+        //Create  Recorder Instance
+        mRecord = new Recording(mContext);
+
         // Button Handlers
         mStartButton = (Button)findViewById(R.id.StartButton);
         mStopButton = (Button)findViewById(R.id.StopButton);
-        mResetButton = (Button)findViewById(R.id.ResetButton);
+
+        mStopButton.setEnabled(false);
+
         // Button Click Listeners
         mStartButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 running = true;
+                mRecord.startRecording();
+                mStartButton.setEnabled(false);
+                mStopButton.setEnabled(true);
+                seconds = 0;
                 runTimer();
+
 
             }
         });
@@ -40,18 +52,13 @@ public class RecordingActivity extends AppCompatActivity {
         mStopButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                mRecord.stopRecording();
+                mStartButton.setEnabled(true);
+                mStopButton.setEnabled(false);
                 running = false;
+                //seconds = 0;
             }
         });
-
-        mResetButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                running = false;
-                seconds = 0;
-            }
-        });
-
 
     }
 
@@ -71,10 +78,12 @@ public class RecordingActivity extends AppCompatActivity {
                 if(running) {
                     seconds++;
                 }
-                handler.postDelayed(this, 1);
+                handler.postDelayed(this, 10);
             }
         });
     }
+
+
 
 }
 
