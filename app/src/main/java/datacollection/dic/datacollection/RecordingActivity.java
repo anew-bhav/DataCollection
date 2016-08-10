@@ -13,10 +13,20 @@ import java.util.Locale;
 public class RecordingActivity extends AppCompatActivity {
     Context mContext;
     Recording mRecord;
+    //UI Elements
     Button mStartButton;
     Button mStopButton;
 
-    //UI Elements
+    Bundle extras;
+    String mode;
+
+    String fileName ,startTime,stopTime,startMillis,stopMillis;
+    long start,stop;
+    long duration;
+
+    private String[] dataFromStartRecording;
+    private String[] dataFromStopRecording;
+
     private int seconds = 0;
     private boolean running;
 
@@ -32,6 +42,9 @@ public class RecordingActivity extends AppCompatActivity {
         mStartButton = (Button)findViewById(R.id.StartButton);
         mStopButton = (Button)findViewById(R.id.StopButton);
 
+        extras = getIntent().getExtras();
+        mode = extras.getString("KEY");
+
         mStopButton.setEnabled(false);
 
         // Button Click Listeners
@@ -39,9 +52,13 @@ public class RecordingActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 running = true;
-                mRecord.startRecording();
+                dataFromStartRecording = mRecord.startRecording();
                 mStartButton.setEnabled(false);
                 mStopButton.setEnabled(true);
+                fileName = dataFromStartRecording[2];
+                startTime = dataFromStartRecording[0];
+                startMillis  =dataFromStartRecording[1];
+                start = Long.parseLong(startMillis);
                 seconds = 0;
                 runTimer();
 
@@ -52,13 +69,19 @@ public class RecordingActivity extends AppCompatActivity {
         mStopButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mRecord.stopRecording();
+                dataFromStopRecording = mRecord.stopRecording();
                 mStartButton.setEnabled(true);
                 mStopButton.setEnabled(false);
+                stopTime = dataFromStopRecording[0];
+                stopMillis = dataFromStopRecording[1];
+                stop = Long.parseLong(stopMillis);
+                duration = stop - start;
                 running = false;
-                //seconds = 0;
+                Message.message(mContext,mode+" "+startTime+" "+stopTime+" "+fileName+" "+duration);
+
             }
         });
+
 
     }
 

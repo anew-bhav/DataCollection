@@ -13,20 +13,27 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Locale;
 
 public class Recording {
 
-    public static final int RECORDER_BPP = 16;
-    public static final String AUDIO_RECORDER_FILE_EXT_WAV = ".wav";
-    public static final String AUDIO_RECORDER_FOLDER = "AudioRecorder";
-    public static final String AUDIO_RECORDER_TEMP_FILE = "record_temp.raw";
-    public static final int[] RECORDER_SAMPLERATE = {8000, 16000, 44100, 48000};
-    public static final int RECORDER_CHANNELS = AudioFormat.CHANNEL_IN_MONO;
-    public static final int RECORDER_AUDIO_ENCODING = AudioFormat.ENCODING_PCM_16BIT;
+    private static final int RECORDER_BPP = 16;
+    private static final String AUDIO_RECORDER_FILE_EXT_WAV = ".wav";
+    private static final String AUDIO_RECORDER_FOLDER = "Recordings";
+    private static final String APP_DATA_FOLDER = "DataCollectionApp";
+    private static final String FILE_PREFIX  = "Rec";
+    private static final String PREFIX_SEPARATOR = "_";
+    private static final String FILE_SEPARATOR = "/";
+    private static final String AUDIO_RECORDER_TEMP_FILE = "record_temp.raw";
+    private static final int[] RECORDER_SAMPLERATE = {8000, 16000, 44100, 48000};
+    private static final int RECORDER_CHANNELS = AudioFormat.CHANNEL_IN_MONO;
+    private static final int RECORDER_AUDIO_ENCODING = AudioFormat.ENCODING_PCM_16BIT;
     boolean isRecording = false;
     Context mContext;
     private AudioRecord mRecorder = null;
     private Thread recordingThread = null;
+    private String [] timestamp;
     public Recording(Context context) {
         mContext = context;
     }
@@ -40,7 +47,9 @@ public class Recording {
         return bufferSize;
     }
 
-    public void startRecording(){
+    public String[] startRecording(){
+        String fileName ;
+        String[] itemsToBeReturned = new String[3];
         mRecorder = new AudioRecord(MediaRecorder.AudioSource.MIC,
                 RECORDER_SAMPLERATE[1],
                 RECORDER_CHANNELS,
@@ -48,10 +57,9 @@ public class Recording {
                 getBufferSize(1));
         int i = mRecorder.getState();
 
+
         if(i==1){
             mRecorder.startRecording();
-
-
         }
 
         isRecording = true;
@@ -64,7 +72,13 @@ public class Recording {
         },"Audio Recorder Thread");
 
         recordingThread.start();
+        timestamp = getTimeStamp();// index 0 contains timestamp,index 1 contains currentTimeMillis
         Message.message(mContext,"Recording Started");
+        fileName = getFilename(false);
+        itemsToBeReturned[0]=timestamp[0];
+        itemsToBeReturned[1]=timestamp[1];
+        itemsToBeReturned[2]=fileName;
+        return itemsToBeReturned;
     }
 
     private void writeAudioDataToFile(){
@@ -98,9 +112,10 @@ public class Recording {
         }
     }
 
-    private String getFilename(){
+    private String getFilename(boolean type){
         String filepath = Environment.getExternalStorageDirectory().getPath();
-        File file = new File(filepath,AUDIO_RECORDER_FOLDER);
+        String fileName = FILE_PREFIX + PREFIX_SEPARATOR + timestamp[0] + AUDIO_RECORDER_FILE_EXT_WAV;
+        File file = new File(filepath,APP_DATA_FOLDER+FILE_SEPARATOR+AUDIO_RECORDER_FOLDER);
 
         if(!file.exists()){
             boolean x  = file.mkdirs();
@@ -108,9 +123,36 @@ public class Recording {
                Message.message(mContext,"File created for the first time");
             }
         }
+        if(type){
+            return (file.getAbsolutePath()+FILE_SEPARATOR+fileName);//want timeStamp in place of millis
+        }
+        else{
+            return fileName;
+        }
 
-        return (file.getAbsolutePath()+"/"+System.currentTimeMillis()+ AUDIO_RECORDER_FILE_EXT_WAV);
 
+
+
+    }
+
+    public String[] stopRecording(){
+        String[] timestamp;
+        timestamp  = null;
+        if (mRecorder!=null){
+            isRecording = false;
+            int i = mRecorder.getState();
+
+            if (i==1){
+                mRecorder.stop();
+                timestamp = getTimeStamp();
+            }
+            mRecorder.release();
+            mRecorder = null;
+            recordingThread = null;
+        }
+        copyWaveFile(getTempFilename(),getFilename(true));
+        deleteTempFile();
+        return timestamp;
     }
 
     private String getTempFilename() {
@@ -120,7 +162,7 @@ public class Recording {
         if (!file.exists()) {
             boolean y = file.mkdirs();
             if(y){
-               Message.message(mContext,"Temp File created");
+                Message.message(mContext,"Temp File created");
             }
         }
 
@@ -129,30 +171,13 @@ public class Recording {
         if (tempFile.exists()){
             boolean isDeleted = tempFile.delete();
             if(isDeleted){
-               Message.message(mContext,"TempFile Deleted Successfully");
+                Message.message(mContext,"TempFile Deleted Successfully");
             }
         }
 
 
 
         return (file.getAbsolutePath() + "/" + AUDIO_RECORDER_TEMP_FILE);
-    }
-
-    public void stopRecording(){
-        if (mRecorder!=null){
-            isRecording = false;
-            int i = mRecorder.getState();
-
-            if (i==1){
-                mRecorder.stop();
-            }
-            mRecorder.release();
-
-            mRecorder = null;
-            recordingThread = null;
-        }
-        copyWaveFile(getTempFilename(),getFilename());
-        deleteTempFile();
     }
 
     private void deleteTempFile(){
@@ -167,8 +192,8 @@ public class Recording {
         FileInputStream in ;
         FileOutputStream out;
         int channels = 1;// TODO:
-        long totalAudioLen = 0;
-        long totalDataLen = totalAudioLen + 36;
+        long totalAudioLen ;
+        long totalDataLen =  36;
         long longSampleRate = RECORDER_SAMPLERATE[1];
 
         long byteRate = (RECORDER_BPP * RECORDER_SAMPLERATE[1] * channels) / 8;
@@ -179,7 +204,7 @@ public class Recording {
             in = new FileInputStream(inFilename);
             out = new FileOutputStream(outFilename);
             totalAudioLen = in.getChannel().size();
-            totalDataLen = totalAudioLen + 36;
+            totalDataLen = totalAudioLen + totalDataLen;
 
             WriteWaveFileHeader(out, totalAudioLen, totalDataLen,
                     longSampleRate, 1, byteRate);
@@ -247,6 +272,19 @@ public class Recording {
         header[43] = (byte) ((totalAudioLen >> 24) & 0xff);
 
         out.write(header, 0, 44);
+    }
+
+    private String[] getTimeStamp() {
+        Locale locale;
+        locale = Locale.ENGLISH;
+        String[] itemsToBeReturned = new String[2];
+        long millis = System.currentTimeMillis();
+        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy_h-mm-ss_a", locale);
+        final String timeStamp = sdf.format(millis);
+        itemsToBeReturned[0] = timeStamp;
+        itemsToBeReturned[1] = String.valueOf(millis);
+
+        return itemsToBeReturned;
     }
 
 
