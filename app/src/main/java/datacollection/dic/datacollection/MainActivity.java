@@ -74,10 +74,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case R.id.export_csv:
-                Toast.makeText(this, "Exported As CSV", Toast.LENGTH_SHORT).show();
+                Message.message(this,"Exported As CSV");
                 return true;
             case R.id.settings:
-                Toast.makeText(this, "Settings Clicked", Toast.LENGTH_SHORT).show();
+                Message.message(this,"Settings Clicked");
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
