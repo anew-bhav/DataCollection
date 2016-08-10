@@ -17,6 +17,8 @@ public class RecordingActivity extends AppCompatActivity {
     Button mStartButton;
     Button mStopButton;
 
+    DatabaseAdapter databaseHelper;
+
     Bundle extras;
     String mode;
 
@@ -37,6 +39,8 @@ public class RecordingActivity extends AppCompatActivity {
         mContext = this;
         //Create  Recorder Instance
         mRecord = new Recording(mContext);
+
+        databaseHelper = new DatabaseAdapter(this);
 
         // Button Handlers
         mStartButton = (Button)findViewById(R.id.StartButton);
@@ -77,7 +81,14 @@ public class RecordingActivity extends AppCompatActivity {
                 stop = Long.parseLong(stopMillis);
                 duration = stop - start;
                 running = false;
-                Message.message(mContext,mode+" "+startTime+" "+stopTime+" "+fileName+" "+duration);
+                //Message.message(mContext,mode+" "+startTime+" "+stopTime+" "+fileName+" "+duration);
+
+                long id = databaseHelper.insertData(mode, fileName, startTime, stopTime, duration);
+                if (id < 0) {
+                    Message.message(getBaseContext(),"Unsuccessful");
+                } else {
+                    Message.message(getBaseContext(),"Successfully inserted one Row");
+                }
 
             }
         });
