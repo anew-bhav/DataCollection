@@ -6,6 +6,7 @@ import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.os.Environment;
+import android.view.View;
 
 
 import java.io.File;
@@ -16,7 +17,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 
-public class Recording {
+public class Recording{
 
     private static final int RECORDER_BPP = 16;
     private static final String AUDIO_RECORDER_FILE_EXT_WAV = ".wav";
@@ -29,6 +30,8 @@ public class Recording {
     private static final int[] RECORDER_SAMPLERATE = {8000, 16000, 44100, 48000};
     private static final int RECORDER_CHANNELS = AudioFormat.CHANNEL_IN_MONO;
     private static final int RECORDER_AUDIO_ENCODING = AudioFormat.ENCODING_PCM_16BIT;
+
+
     boolean isRecording = false;
     Context mContext;
     private AudioRecord mRecorder = null;
@@ -38,6 +41,26 @@ public class Recording {
         mContext = context;
     }
     //Get the  minimum buffer required to store PCM bits
+
+    public static int getRecorderBpp() {
+        return RECORDER_BPP;
+    }
+
+    public static String getAudioRecorderFileExtWav() {
+        return AUDIO_RECORDER_FILE_EXT_WAV;
+    }
+
+    public static int getRecorderSamplerate(int i) {
+        return RECORDER_SAMPLERATE[i];
+    }
+
+    public static int getRecorderChannels() {
+        return RECORDER_CHANNELS;
+    }
+
+    public static int getRecorderAudioEncoding() {
+        return RECORDER_AUDIO_ENCODING;
+    }
 
     public int getBufferSize(int i){
         int bufferSize;
@@ -286,8 +309,6 @@ public class Recording {
 
         return itemsToBeReturned;
     }
-
-
 
 
 

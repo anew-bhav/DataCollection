@@ -1,6 +1,9 @@
 package datacollection.dic.datacollection;
 
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -8,7 +11,14 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
+
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
     TextView pedestrian;
@@ -17,12 +27,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     TextView car;
     TextView bus;
 
-
+    DatabaseAdapter databasehelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        databasehelper = new DatabaseAdapter(this);
         //Button Handlers
         pedestrian = (TextView)findViewById(R.id.ped_textview);
         automobile = (TextView)findViewById(R.id.automobile_textview);
@@ -76,13 +88,76 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case R.id.export_csv:
-                Message.message(this,"Exported As CSV");
+                exportDBasCSV();
                 return true;
             case R.id.settings:
                 Message.message(this,"Settings Clicked");
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void exportDBasCSV(){
+        SQLiteDatabase db = databasehelper.getReadableDatabase();
+        Cursor c ;
+        long systemMillis = System.currentTimeMillis();
+        Date date = new Date(systemMillis);
+        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH-mm-ss,SSS", Locale.ENGLISH);
+
+        try{
+            c = db.rawQuery("SELECT * FROM "+databasehelper.getTableName(),null);
+            int rowcount ;
+            int colcount ;
+            File filepath = Environment.getExternalStorageDirectory();
+            String filename = sdf.format(date)+".csv";
+            File saveFile  = new File(filepath,"DataCollectionApp/CSV"+filename);
+
+            /*if(!saveFile.exists()){
+                boolean x = saveFile.mkdirs();
+                if (x){
+                    Message.message(getBaseContext(),"CSV Directory Created");
+                }
+            }*/
+            FileWriter fw = new FileWriter(saveFile);
+
+            BufferedWriter bw = new BufferedWriter(fw);
+            rowcount = c.getCount();
+            colcount = c.getColumnCount();
+            if(rowcount > 0){
+                c.moveToFirst();
+                for(int i = 0;i<colcount;i++){
+                    if(i!=colcount-1){
+                        bw.write(c.getColumnName(i)+",");
+                    }else{
+                        bw.write(c.getColumnName(i));
+                    }
+                }
+                bw.newLine();
+                for(int i = 0;i<rowcount;i++){
+                    c.moveToPosition(i);
+
+                    for (int j=0;j<colcount;j++){
+                        if (j!=colcount-1)
+                            bw.write(c.getString(j)+",");
+                        else
+                            bw.write(c.getString(j));
+                    }
+                    bw.newLine();
+                }
+                bw.flush();
+                c.close();
+                Message.message(getBaseContext(),"Exported Successfully");
+            }
+        }catch(Exception ex){
+            if(db.isOpen()){
+                db.close();
+                Message.message(getBaseContext(),ex.getMessage());
+            }
+        }finally{
+            if(db.isOpen()) {
+                db.close();
+            }
         }
     }
 }

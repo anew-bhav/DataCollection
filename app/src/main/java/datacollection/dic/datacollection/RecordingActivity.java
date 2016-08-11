@@ -1,6 +1,7 @@
 package datacollection.dic.datacollection;
 
 import android.content.Context;
+import android.icu.text.AlphabeticIndex;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -23,6 +24,9 @@ public class RecordingActivity extends AppCompatActivity {
     String mode;
 
     String fileName ,startTime,stopTime,startMillis,stopMillis;
+    int SamplingRate = Recording.getRecorderSamplerate(1);
+    int Bpp = Recording.getRecorderBpp();
+    String channels = "MONO";
     long start,stop;
     long duration;
 
@@ -81,7 +85,7 @@ public class RecordingActivity extends AppCompatActivity {
                 stop = Long.parseLong(stopMillis);
                 duration = stop - start;
                 running = false;
-                //Message.message(mContext,mode+" "+startTime+" "+stopTime+" "+fileName+" "+duration);
+                
 
                 long id = databaseHelper.insertData(mode, fileName, startTime, stopTime, duration);
                 if (id < 0) {
