@@ -1,6 +1,7 @@
 package datacollection.dic.datacollection;
 
 import android.content.Context;
+import android.icu.text.AlphabeticIndex;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -13,10 +14,25 @@ import java.util.Locale;
 public class RecordingActivity extends AppCompatActivity {
     Context mContext;
     Recording mRecord;
+    //UI Elements
     Button mStartButton;
     Button mStopButton;
 
-    //UI Elements
+    DatabaseAdapter databaseHelper;
+
+    Bundle extras;
+    String mode;
+
+    String fileName ,startTime,stopTime,startMillis,stopMillis;
+    int SamplingRate = Recording.getRecorderSamplerate(1);
+    int Bpp = Recording.getRecorderBpp();
+    String channels = "MONO";
+    long start,stop;
+    long duration;
+
+    private String[] dataFromStartRecording;
+    private String[] dataFromStopRecording;
+
     private int seconds = 0;
     private boolean running;
 
@@ -28,9 +44,14 @@ public class RecordingActivity extends AppCompatActivity {
         //Create  Recorder Instance
         mRecord = new Recording(mContext);
 
+        databaseHelper = new DatabaseAdapter(this);
+
         // Button Handlers
         mStartButton = (Button)findViewById(R.id.StartButton);
         mStopButton = (Button)findViewById(R.id.StopButton);
+
+        extras = getIntent().getExtras();
+        mode = extras.getString("KEY");
 
         mStopButton.setEnabled(false);
 
@@ -39,9 +60,13 @@ public class RecordingActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 running = true;
-                mRecord.startRecording();
+                dataFromStartRecording = mRecord.startRecording();
                 mStartButton.setEnabled(false);
                 mStopButton.setEnabled(true);
+                fileName = dataFromStartRecording[2];
+                startTime = dataFromStartRecording[0];
+                startMillis  =dataFromStartRecording[1];
+                start = Long.parseLong(startMillis);
                 seconds = 0;
                 runTimer();
 
@@ -52,13 +77,26 @@ public class RecordingActivity extends AppCompatActivity {
         mStopButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mRecord.stopRecording();
+                dataFromStopRecording = mRecord.stopRecording();
                 mStartButton.setEnabled(true);
                 mStopButton.setEnabled(false);
+                stopTime = dataFromStopRecording[0];
+                stopMillis = dataFromStopRecording[1];
+                stop = Long.parseLong(stopMillis);
+                duration = stop - start;
                 running = false;
-                //seconds = 0;
+                
+
+                long id = databaseHelper.insertData(mode, fileName, startTime, stopTime, duration);
+                if (id < 0) {
+                    Message.message(getBaseContext(),"Unsuccessful");
+                } else {
+                    Message.message(getBaseContext(),"Successfully inserted one Row");
+                }
+
             }
         });
+
 
     }
 

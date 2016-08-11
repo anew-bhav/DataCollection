@@ -2,7 +2,11 @@
   <dictionary name="build-dev">
     <words>
       <w>buffersize</w>
+      <w>colcount</w>
+      <w>databasehelper</w>
       <w>datacollection</w>
+      <w>millisec</w>
+      <w>rowcount</w>
       <w>samplerate</w>
       <w>textview</w>
       <w>twowheeler</w>
